@@ -5,18 +5,20 @@ defmodule ProblemC do
 
   alias __MODULE__.Person
 
+  use Supervisor
+
   @doc """
   Start two people: Alice and Bob, always and forever.
   """
 
   def start_link() do
-    GenServer.start_link(__MODULE__, nil)
+    Supervisor.start_link(__MODULE__, nil)
   end
 
   def init(_) do
-    {:ok, _} = Person.start_link(:alice)
-    {:ok, _} = Person.start_link(:bob)
-    {:ok, nil}
+    alice = worker(Person, [:alice], [id: :alice])
+    bob = worker(Person, [:bob], [id: :bob])
+    supervise([alice, bob], [strategy: :one_for_one])
   end
 
   ## Do not change code below
