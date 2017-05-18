@@ -4,19 +4,20 @@ defmodule ProblemF do
   """
 
   alias __MODULE__.{Logger, Server}
+  use Supervisor
 
   @doc """
   Start an Agent to hold account balance and GenServer that updates it.
   """
   def start_link() do
-    GenServer.start_link(__MODULE__, nil)
+    Supervisor.start_link(__MODULE__, nil)
   end
 
   @doc false
   def init(_) do
-    {:ok, _} = Logger.start_link()
-    {:ok, _} = Server.start_link()
-    {:ok, nil}
+    logger = worker(Logger, [])
+    server = worker(Server, [])
+    supervise([logger, server], [strategy: :one_for_one])
   end
 
   ## Do not change code below
