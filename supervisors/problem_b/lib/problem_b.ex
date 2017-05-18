@@ -3,20 +3,21 @@ defmodule ProblemB do
   ProblemB.
   """
 
+  use Supervisor
   alias __MODULE__.{State, Server}
 
   @doc """
   Start an Agent to hold account balance and GenServer that updates it.
   """
   def start_link() do
-    GenServer.start_link(__MODULE__, nil)
+    Supervisor.start_link(__MODULE__, nil)
   end
 
   @doc false
-  def init(_) do
-    {:ok, _} = State.start_link()
-    {:ok, _} = Server.start_link()
-    {:ok, nil}
+  def init(nil) do
+    children = [Supervisor.Spec.worker(State, []), worker(Server, [])]
+    opts = [strategy: :one_for_one]
+    supervise(children, opts)
   end
 
   ## Do not change code below
