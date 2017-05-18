@@ -14,6 +14,20 @@ defmodule ProblemA do
   Fetch a value from the agent.
   """
   def fetch!(agent, key) do
-    Agent.get(agent, Map, :fetch!, [key])
+    res = Agent.get(agent, fn(state) ->
+      try do
+        Map.fetch!(state, key)
+      rescue
+        ex in KeyError ->
+          {:error, ex}
+      else
+        value ->
+          {:ok, value}
+      end
+    end)
+    case res do
+      {:ok, value} -> value
+      {:error, ex} -> raise ex
+    end
   end
 end
